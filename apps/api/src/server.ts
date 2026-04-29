@@ -2,6 +2,7 @@ import express, { type Application } from "express";
 import cors from "cors";
 import { env } from "./config/env";
 import routes from "./routes"
+import { errorHandler } from "./errors/errorHandler";
 
 
 const app: Application = express();
@@ -23,8 +24,11 @@ app.use(express.urlencoded({ extended: true }));
 // api routes
 app.use("/api/v1", routes);
 
-const PORT = env.PORT;
+// error handler
+app.use(errorHandler);
 
+
+const PORT = env.PORT;
 
 app.listen(PORT, () => {
     console.log(`server started at port ${PORT}`);
