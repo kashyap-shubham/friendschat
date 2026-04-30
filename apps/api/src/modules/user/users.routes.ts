@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { UserController } from "./users.controller";
 import { asyncHandler } from "@/utils/asyncHandler";
+import { requireAuth } from "@/middleware/requireAuth";
 
 
 
