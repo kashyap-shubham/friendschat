@@ -9,6 +9,7 @@ import compression from "compression";
 import routes from "./routes"
 import { env } from "./config/env";
 import { errorHandler } from "./errors/errorHandler";
+import { httpLogger } from "@repo/logger";
 
 
 const app: Application = express();
