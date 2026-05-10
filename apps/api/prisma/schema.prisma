@@ -19,6 +19,8 @@ model User {
   session   Session[]
 
   createdAt DateTime @default(now())
+
+  @@index([email, googleId])
 }
 
 model Conversation {
