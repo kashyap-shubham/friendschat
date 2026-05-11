@@ -7,6 +7,14 @@ datasource db {
   provider = "postgresql"
 }
 
+enum MessageType {
+  TEXT
+  IMAGE
+  VIDEO
+  AUDIO
+  FILE
+}
+
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -16,19 +24,28 @@ model User {
 
   messages  Message[]
   participants Participant[]
-  session   Session[]
+  sessions  Session[]
 
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  @@index([email, googleId])
+  @@index([email])
+  @@index([googleId])
 }
 
 model Conversation {
   id            String        @id @default(uuid())
+  name          String?
+  isGroup       Boolean       @default(false)
+
   participants  Participant[]
   messages      Message[]
 
   createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([updatedAt])
+  @@index([createdAt])
 }
 
 model Participant {
@@ -36,22 +53,39 @@ model Participant {
   userId          String
   conversationId  String
 
-  user            User          @relation(fields: [userId], references: [id])
-  conversation    Conversation  @relation(fields: [conversationId], references: [id])
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation    Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  createdAt       DateTime      @default(now())
 
   @@unique([userId, conversationId])
+
+  @@index([userId])
+  @@index([conversationId])
 }
 
 model Message {
   id              String        @id @default(uuid())
+  
   content         String
+  messageType     MessageType   @default(TEXT)
+
+  mediaUrl        String?
+  mimeType        String?
+  fileSize        Int?
+
   senderId        String
   conversationId  String
 
-  sender          User          @relation(fields: [senderId], references: [id])
-  conversation    Conversation  @relation(fields: [conversationId], references: [id])
+  sender          User          @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  conversation    Conversation  @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([senderId])
+  @@index([conversationId])
+  @@index([createdAt])
 }
 
 model Session {
@@ -60,8 +94,13 @@ model Session {
   sessionId String      @unique
   userAgent String?
   ip        String?
+  
+  isRevoked Boolean     @default(false)
+
   createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
   expiresAt DateTime
+
   user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])

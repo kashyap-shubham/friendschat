@@ -11,15 +11,14 @@ const envSchema = z.object({
 
     FRONTEND_URL: z.string().min(1),
 
-    CDN_URL: z.url(),
-
+    SESSION_SECRET: z.string().min(32),
+    
     GOOGLE_CLIENT_ID: z.string().min(1),
 
     GOOGLE_CLIENT_SECRET: z.string().min(1),
 
     GOOGLE_CALLBACK_URL: z.string().min(1),
 
-    SESSION_SECRET: z.string().min(32),
 });
 
 const parsed = envSchema.safeParse(process.env);
