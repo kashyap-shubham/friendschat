@@ -12,63 +12,72 @@ type AddParticipantsInput = {
 };
 
 export class ConversationRepository {
-
   async findDirectConversation(participantIds: string[]) {
-
     return prisma.conversation.findFirst({
-
       where: {
         isGroup: false,
 
-        participants: {
-          every: {
-            userId: {
-              in: participantIds,
+        AND: [
+          {
+            participants: {
+              every: {
+                userId: {
+                  in: participantIds,
+                },
+              },
             },
           },
-        },
+
+          {
+            participants: {
+              some: {
+                userId: participantIds[0],
+              },
+            },
+          },
+
+          {
+            participants: {
+              some: {
+                userId: participantIds[1],
+              },
+            },
+          },
+        ],
       },
 
       include: {
-        participants: true,
+        participants: {
+          include: {
+            user: true,
+          },
+        },
       },
-
     });
-
   }
 
   async createConversation(data: CreateConversationRepositoryInput) {
-
     return prisma.conversation.create({
-
       data: {
         name: data.name,
         isGroup: data.isGroup ?? false,
       },
-
     });
-
   }
 
   async addParticipants(data: AddParticipantsInput) {
-
     return prisma.participant.createMany({
-
       data: data.participantIds.map((participantId) => ({
         userId: participantId,
         conversationId: data.conversationId,
       })),
 
       skipDuplicates: true,
-
     });
-
   }
 
   async getUserConversations(userId: string) {
-
     return prisma.conversation.findMany({
-
       where: {
         participants: {
           some: {
@@ -96,15 +105,11 @@ export class ConversationRepository {
       orderBy: {
         updatedAt: "desc",
       },
-
     });
-
   }
 
   async getConversationById(conversationId: string) {
-
     return prisma.conversation.findUnique({
-
       where: {
         id: conversationId,
       },
@@ -122,11 +127,6 @@ export class ConversationRepository {
           },
         },
       },
-
     });
-
   }
-
 }
-
-export const conversationRepository = new ConversationRepository();
